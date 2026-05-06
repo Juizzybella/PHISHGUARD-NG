@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PhishGuard NG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+      text-align: center;
+      padding: 40px;
+    }
+
+    h1 {
+      color: #6366f1;
+    }
+
+    textarea {
+      width: 90%;
+      max-width: 500px;
+      height: 120px;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 12px;
+      width: 90%;
+      max-width: 300px;
+      border: none;
+      border-radius: 8px;
+      background: #6366f1;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background: #4f46e5;
+    }
+
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 10px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    ul {
+      text-align: left;
+      max-width: 500px;
+      margin: 20px auto;
+      padding: 0;
+      list-style: none;
+    }
+
+    li {
+      background: #1e293b;
+      padding: 10px;
+      margin-bottom: 8px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    li:hover {
+      background: #334155;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>🔐 PhishGuard NG</h1>
+  <p>Check if a message or link is a scam</p>
+
+  <textarea id="inputText" placeholder="Paste message or link here..."></textarea><br>
+  <button onclick="analyze()">Analyze Message</button>
+
+  <div id="output" class="result"></div>
+
+  <h3>⚠️ Common Scam Examples in Nigeria:</h3>
+  <ul>
+    <li onclick="fillExample(this)">Your BVN has been suspended, click here to reactivate</li>
+    <li onclick="fillExample(this)">You have received ₦50,000, verify your account now</li>
+    <li onclick="fillExample(this)">Dear customer, your bank account will be blocked urgently</li>
+    <li onclick="fillExample(this)">NIN verification required immediately</li>
+  </ul>
+
+<script>
+function speak(message) {
+  let speech = new SpeechSynthesisUtterance(message);
+  speech.rate = 1;
+  speech.pitch = 1;
+  speech.volume = 1;
+  window.speechSynthesis.speak(speech);
+}
+
+function fillExample(el) {
+  document.getElementById("inputText").value = el.innerText;
+}
+
+function analyze() {
+  let text = document.getElementById("inputText").value.toLowerCase();
+  let score = 0;
+  let reasons = [];
+
+  let keywords = ["urgent", "verify", "account", "click here", "bank", "password", "otp", "login"];
+
+  keywords.forEach(word => {
+    if (text.includes(word)) {
+      score++;
+    }
+  });
+
+  // Explanation logic
+  if (text.includes("urgent")) reasons.push("Uses urgency to pressure you");
+  if (text.includes("verify")) reasons.push("Requests verification of sensitive info");
+  if (text.includes("password")) reasons.push("Asks for sensitive credentials");
+  if (text.includes("click here")) reasons.push("Contains suspicious link instruction");
+
+  // Link detection
+  let hasLink = text.includes("http://") || text.includes("https://");
+  if (hasLink && text.includes("http://")) {
+    reasons.push("Uses insecure link (http instead of https)");
+  }
+
+  let result = document.getElementById("output");
+
+  let explanation = reasons.length 
+    ? "<br><br><strong>Why?</strong><br>" + reasons.join("<br>")
+    : "";
+
+  if (score >= 4) {
+    result.style.background = "red";
+    result.innerHTML = "⚠️ Dangerous: This looks like a phishing attempt!" + explanation;
+    speak("Warning. This message is dangerous.");
+  } 
+  else if (score >= 2) {
+    result.style.background = "orange";
+    result.innerHTML = "⚠️ Suspicious: Be careful with this message." + explanation;
+    speak("Caution. This message is suspicious.");
+  } 
+  else {
+    result.style.background = "green";
+    result.innerHTML = "✅ Safe: No strong phishing signs detected.";
+    speak("This message appears safe.");
+  }
+}
+</script>
+
+</body>
+</html>
